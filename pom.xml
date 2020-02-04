@@ -8,18 +8,21 @@
     <name>new-bank</name>
     <url>http://maven.apache.org</url>
 
+    <properties>
+        <maven.compiler.release>13</maven.compiler.release>
+        <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+        <junit-jupiter-engine.version>5.4.0</junit-jupiter-engine.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.4.0</version>
+            <version>${junit-jupiter-engine.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
-
-    <properties>
-        <maven.compiler.release>13</maven.compiler.release>
-    </properties>
 
     <build>
         <pluginManagement>
@@ -27,7 +30,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>${maven-compiler-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>
