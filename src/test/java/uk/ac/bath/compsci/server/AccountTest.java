@@ -1,5 +1,10 @@
 package uk.ac.bath.compsci.server;
 
-class AccountTest {
+import org.junit.jupiter.api.Test;
 
+class AccountTest {
+    @Test
+    void name() {
+
+    }
 }
