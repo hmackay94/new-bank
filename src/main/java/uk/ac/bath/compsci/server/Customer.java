@@ -20,4 +20,17 @@ public class Customer {
     public void addAccount(Account account) {
         accounts.add(account);
     }
+
+    public Account getAccount(String accountName) {
+
+        Account rtn = null;
+
+        for (Account a : accounts) {
+            if (a.getAccountName().equalsIgnoreCase(accountName)) {
+                rtn = a;
+            }
+        }
+        return rtn;
+    }   // end of Account
+
 }

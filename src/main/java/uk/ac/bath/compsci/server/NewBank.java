@@ -39,11 +39,55 @@ public class NewBank {
     // commands from the NewBank customer are processed in this method
     public synchronized String processRequest(CustomerID customer, String request) {
         if (customers.containsKey(customer.getKey())) {
-            switch (request) {
+
+            String[] request2 = request.split(" ");
+            String cmd = request2[0];
+
+            switch (cmd) {
                 case "SHOWMYACCOUNTS":
                     return showMyAccounts(customer);
-                default:
+                case "NEWACCOUNT":
+                    //TODO - open a new account
                     return "FAIL";
+                case "DEPOSIT":
+                    //Deposit money into one of your account
+                    if (request2[1].isEmpty() || request2[2].isEmpty()) {
+                        return "FAIL - invalid command";
+                    }
+                    return deposit(customer, request2[1], Double.parseDouble(request2[2]));
+                case "PAY":
+                    //TODO - Pay a friend (payee)
+                    return "FAIL";
+                case "MOVE":
+                    //TODO - move money between your accounts
+                    return "FAIL";
+                case "PRINTSTATEMENT":
+                    //Print a statement of balances and recent transactions to screen
+                    String rtn = "FAIL";
+                    if (!request2[1].isEmpty()) {
+                        rtn = printStatement(customer, request2[1]);
+                    }
+                    return rtn;
+                case "WITHDRAW":
+                    //TODO - withdraw money from one of your accounts
+                    return "FAIL";
+                case "FINDTRANSACTION":
+                    //TODO - search for a transaction
+                    return "FAIL";
+                case "ADDFRIEND":
+                    //TODO - add a friend (payee)
+                    return "FAIL";
+                case "REQUESTLOAN":
+                    //TODO - request a mirco loan from NewBank
+                    return "FAIL";
+                case "MAKELOANPAYMENT":
+                    //TODO - make a payment to a loan
+                    return "FAIL";
+                case "EXIT":
+                    //TODO - gracefully end the client session
+                    return "SUCCESS";
+                default:
+                    return "Command not recognized";
             }
         }
         return "FAIL";
@@ -51,6 +95,23 @@ public class NewBank {
 
     private String showMyAccounts(CustomerID customer) {
         return (customers.get(customer.getKey())).accountsToString();
+    }
+
+    private String deposit(CustomerID customer, String AccountName, Double amount) {
+        Account customerAccount = (customers.get(customer.getKey())).getAccount(AccountName);
+        if (customerAccount == null) {
+            return "FAIL - Account does not exist";
+        }
+        customerAccount.deposit(amount);
+        return "SUCCESS";
+    }
+
+    private String printStatement(CustomerID customer, String AccountName) {
+        Account customerAccount = (customers.get(customer.getKey())).getAccount(AccountName);
+        if (customerAccount == null) {
+            return "FAIL - Account does not exist";
+        }
+        return customerAccount.printTransactions();
     }
 
 }
