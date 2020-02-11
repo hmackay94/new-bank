@@ -14,10 +14,14 @@ MOVE <Amount> <From> <To>
 e.g. MOVE 100 Main Savings 
 Returns SUCCESS or FAIL
 
-PAY <Person/Company> <Ammount>
+PAY <Person/Company> <Amount>
 e.g. PAY John 100
 Returns SUCCESS or FAIL
 
-DEPOSIT <Name> <Amount>
+DEPOSIT <Account Name> <Amount>
 e.g. DEPOSIT Savings 100
 Returns SUCCESS or FAIL
+
+PRINTSTATEMENT <Account Name>
+e.g. PRINTSTATEMENT Checking
+Returns a list of recent transactions including Date, Category, Transaction Description and Amount

@@ -50,11 +50,15 @@ public class NewBank {
                     //TODO - open a new account
                     return "FAIL";
                 case "DEPOSIT":
-                    //Deposit money into one of your account
-                    if (request2[1].isEmpty() || request2[2].isEmpty()) {
-                        return "FAIL - invalid command";
+                    //Deposit money into one of your accounts
+                    try {
+                        if (request2[1].isEmpty() || request2[2].isEmpty()) {
+                            return "FAIL - invalid command";
+                        }
+                        return deposit(customer, request2[1], Double.parseDouble(request2[2]));
+                    } catch (NumberFormatException e) {
+                        return "FAIL - invalid amount";
                     }
-                    return deposit(customer, request2[1], Double.parseDouble(request2[2]));
                 case "PAY":
                     //TODO - Pay a friend (payee)
                     return "FAIL";
