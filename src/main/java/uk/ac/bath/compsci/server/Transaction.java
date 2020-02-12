@@ -5,20 +5,19 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Transaction {
-    //private Account account;
     private Date date;
     private String description;
     private Double amount;
     private String category;
 
-    public Transaction(Account acc, Date txnDate, String txnDesc, Double txnAmt) {
+    public Transaction(Date txnDate, String txnDesc, Double txnAmt) {
         this.amount = txnAmt;
         this.date = txnDate;
         this.description = txnDesc;
         this.category = "No category";
     }
 
-    public Transaction(Account acc, Date txnDate, String txnDesc, Double txnAmt, String txnCat) {
+    public Transaction(Date txnDate, String txnDesc, Double txnAmt, String txnCat) {
         this.amount = txnAmt;
         this.date = txnDate;
         this.description = txnDesc;

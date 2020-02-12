@@ -1,5 +1,6 @@
 package uk.ac.bath.compsci.server;
 
+import java.util.Date;
 import java.util.HashMap;
 
 public class NewBank {
@@ -12,16 +13,21 @@ public class NewBank {
     }
 
     private void addTestData() {
+        final Date currentDate = new Date();
+
         Customer bhagy = new Customer();
-        bhagy.addAccount(new Account("Main", 1000.0));
+        final double bhagyOpeningBalance = 1000;
+        bhagy.addAccount(new Account("Main", bhagyOpeningBalance, new Transaction(currentDate, "Opening Balance", bhagyOpeningBalance)));
         customers.put("Bhagy", bhagy);
 
         Customer christina = new Customer();
-        christina.addAccount(new Account("Savings", 1500.0));
+        final double christinaOpeningBalance = 1500;
+        christina.addAccount(new Account("Savings", christinaOpeningBalance, new Transaction(currentDate, "Opening Balance", christinaOpeningBalance)));
         customers.put("Christina", christina);
 
         Customer john = new Customer();
-        john.addAccount(new Account("Checking", 250.0));
+        final double johnOpeningBalance = 250;
+        john.addAccount(new Account("Checking", johnOpeningBalance, new Transaction(currentDate, "Opening Balance", christinaOpeningBalance)));
         customers.put("John", john);
     }
 
@@ -106,7 +112,8 @@ public class NewBank {
         if (customerAccount == null) {
             return "FAIL - Account does not exist";
         }
-        customerAccount.deposit(amount);
+        // TODO: Move Transaction creation
+        customerAccount.deposit(amount, new Transaction(new Date(), "Customer deposit", amount));
         return "SUCCESS";
     }
 
