@@ -1,6 +1,5 @@
 package uk.ac.bath.compsci.server;
 
-
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
@@ -45,7 +44,7 @@ public class Account {
             this.transactionList.add(withdrawalTransaction);
             this.balance = (balance - amount);
         } else {
-            throw new IllegalArgumentException("amount must not be greater than balance");
+            throw new IllegalArgumentException("Insufficient funds - amount must not be greater than balance");
         }
     }
 
@@ -72,4 +71,4 @@ public class Account {
             throw new IllegalArgumentException(message);
         return toCheck;
     }
-}
+}   // end of Account

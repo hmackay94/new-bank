@@ -19,6 +19,18 @@ public class Payee {
         return (PayeeName + ": " + PayeeBank + ": " + AccountNumber + ": " + SortCode);
     }
 
+    public String getPayeeName() {
+        return PayeeName;
+    }
+
+    public String getSortCode() {
+        return SortCode;
+    }
+
+    public Integer getAccountNumber() {
+        return AccountNumber;
+    }
+
     private static String requireNonBlank(final String toCheck, final String message) {
         if (isBlank(toCheck))
             throw new IllegalArgumentException(message);

@@ -31,7 +31,7 @@ public class Customer {
             }
         }
         return rtn;
-    }   // end of Account
+    }
 
     public void addPayee(Payee payee) {
         payees.add(payee);
@@ -45,4 +45,14 @@ public class Customer {
         return rtn.toString();
     }
 
-}
+    public Payee getPayee(String payeeName) {
+        Payee rtn = null;
+        for (Payee p : payees) {
+            if (p.getPayeeName().equalsIgnoreCase(payeeName)) {
+                rtn = p;
+            }
+        }
+        return rtn;
+    }
+
+}   // end of Customer

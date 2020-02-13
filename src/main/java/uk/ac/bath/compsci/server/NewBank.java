@@ -67,11 +67,22 @@ public class NewBank {
                         return "FAIL - invalid amount";
                     }
                 case "PAYFRIEND":
-                    //TODO - Pay a friend (payee)
+                    //TODO - Pay a friend
                     return "FAIL";
                 case "PAY":
-                    //TODO - Pay a friend (payee)
-                    return "FAIL";
+                    if (!request2[1].isEmpty()) {
+                        if (request2[1].equalsIgnoreCase("?")) {
+                            return "PAY <PayeeName>, <FromAccount>, <Amount>";
+                        }
+                    }
+                    try {
+                        if (request2[1].isEmpty() || request2[2].isEmpty()) {
+                            return "FAIL - invalid command";
+                        }
+                        return pay(customer, request2[1], request2[2], Double.parseDouble(request2[3]));
+                    } catch (NumberFormatException e) {
+                        return "FAIL - invalid amount";
+                    }
                 case "MOVE":
                     //TODO - move money between your accounts
                     return "FAIL";
@@ -165,4 +176,16 @@ public class NewBank {
         return myCustomer.printPayees();
     }
 
+    private String pay(CustomerID customer, String PayeeName, String FromAccount, double amount) {
+        Account customerAccount = customers.get(customer.getKey()).getAccount(FromAccount);
+        Payee customerPayee = customers.get(customer.getKey()).getPayee(PayeeName);
+        if (customerAccount == null) {
+            return "FAIL - Account does not exist";
+        }
+        if (customerPayee == null) {
+            return "FAIL - Payee does not exist";
+        }
+        customerAccount.withdraw(amount, new Transaction(new Date(), "Pay " + PayeeName, amount));
+        return "SUCCESS - Payment made to " + customerPayee.getPayeeName() + " " + customerPayee.getSortCode() + " " + customerPayee.getAccountNumber();
+    }
 }
