@@ -62,8 +62,8 @@ public class NewBank {
                             return "FAIL - invalid command";
                         }
                         return deposit(customer, request2[1], Double.parseDouble(request2[2]));
-                    } catch (NumberFormatException e) {
-                        return "FAIL - invalid amount";
+                    } catch (IllegalArgumentException | NullPointerException e) {
+                        return e.getMessage();
                     }
                 case "PAY":
                     //TODO - Pay a friend (payee)
