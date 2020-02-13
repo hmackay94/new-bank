@@ -42,6 +42,24 @@ public class NewBank {
         return null;
     }
 
+    public synchronized String createCustomer(String userName, String password) {
+        if (customers.containsKey(userName)) {
+            return "NOT UNIQUE USERNAME";
+        }
+        else if (password.length()<8) {
+            return "PASSWORD TOO SHORT";
+        }
+        else {
+            Customer newCustomer = new Customer();
+            final double openingBalance = 0;
+            final Date currentDate = new Date();
+            newCustomer.addAccount(new Account("Main", openingBalance, new Transaction(currentDate, "Opening Balance", openingBalance)));
+            customers.put(userName, newCustomer);
+            return "REGISTERED AND MAIN ACCOUNT CREATED";
+        }
+
+    }
+
     // commands from the NewBank customer are processed in this method
     public synchronized String processRequest(CustomerID customer, String request) {
         if (customers.containsKey(customer.getKey())) {
