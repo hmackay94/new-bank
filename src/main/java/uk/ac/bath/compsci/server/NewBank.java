@@ -27,7 +27,7 @@ public class NewBank {
 
         Customer john = new Customer();
         final double johnOpeningBalance = 250;
-        john.addAccount(new Account("Checking", johnOpeningBalance, new Transaction(currentDate, "Opening Balance", christinaOpeningBalance)));
+        john.addAccount(new Account("Checking", johnOpeningBalance, new Transaction(currentDate, "Opening Balance", johnOpeningBalance)));
         customers.put("John", john);
     }
 
