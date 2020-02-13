@@ -48,6 +48,7 @@ public class NewBank {
 
             String[] request2 = request.split(" ");
             String cmd = request2[0];
+            String rtn = "";
 
             switch (cmd) {
                 case "SHOWMYACCOUNTS":
@@ -65,6 +66,9 @@ public class NewBank {
                     } catch (NumberFormatException e) {
                         return "FAIL - invalid amount";
                     }
+                case "PAYFRIEND":
+                    //TODO - Pay a friend (payee)
+                    return "FAIL";
                 case "PAY":
                     //TODO - Pay a friend (payee)
                     return "FAIL";
@@ -73,7 +77,7 @@ public class NewBank {
                     return "FAIL";
                 case "PRINTSTATEMENT":
                     //Print a statement of balances and recent transactions to screen
-                    String rtn = "FAIL";
+                    rtn = "FAIL";
                     if (!request2[1].isEmpty()) {
                         rtn = printStatement(customer, request2[1]);
                     }
@@ -87,6 +91,25 @@ public class NewBank {
                 case "ADDFRIEND":
                     //TODO - add a friend (payee)
                     return "FAIL";
+                case "ADDPAYEE":
+                    //Add a new payee
+                    //AccNum, SortCode, PayeeName, Bank, Reference
+                    rtn = "";
+                    if (!request2[1].isEmpty()) {
+                        if (request2[1].equalsIgnoreCase("?")) {
+                            return "ADDPAYEE <AccNum>, <SortCode>, <PayeeName>, <Bank>";
+                        }
+                    }
+                    if (request2[1].isEmpty() || request2[2].isEmpty() || request2[3].isEmpty() || request2[4].isEmpty()) {
+                        rtn = "FAIL";
+                    } else {
+                        rtn = addPayee(customer, Integer.parseInt(request2[1]), request2[2], request2[3], request2[4]);
+                    }
+                    return rtn;
+                case "SHOWMYPAYEES":
+                    //Print a list of payees
+                    rtn = printListOfPayees(customer);
+                    return rtn;
                 case "REQUESTLOAN":
                     //TODO - request a mirco loan from NewBank
                     return "FAIL";
@@ -123,6 +146,23 @@ public class NewBank {
             return "FAIL - Account does not exist";
         }
         return customerAccount.printTransactions();
+    }
+
+    private String addPayee(CustomerID customer, Integer AccNum, String SortCode, String PayeeName, String Bank) {
+        Customer myCustomer = customers.get(customer.getKey());
+        if (myCustomer == null) {
+            return "FAIL";
+        }
+        myCustomer.addPayee(new Payee(AccNum, SortCode, PayeeName, Bank));
+        return "SUCCESS";
+    }
+
+    private String printListOfPayees(CustomerID customer) {
+        Customer myCustomer = customers.get(customer.getKey());
+        if (myCustomer == null) {
+            return "FAIL";
+        }
+        return myCustomer.printPayees();
     }
 
 }
