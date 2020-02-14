@@ -27,7 +27,7 @@ public class NewBank {
 
         Customer john = new Customer();
         final double johnOpeningBalance = 250;
-        john.addAccount(new Account("Checking", johnOpeningBalance, new Transaction(currentDate, "Opening Balance", christinaOpeningBalance)));
+        john.addAccount(new Account("Checking", johnOpeningBalance, new Transaction(currentDate, "Opening Balance", johnOpeningBalance)));
         customers.put("John", john);
     }
 
@@ -66,6 +66,7 @@ public class NewBank {
 
             String[] request2 = request.split(" ");
             String cmd = request2[0];
+            String rtn = "";
 
             switch (cmd) {
                 case "SHOWMYACCOUNTS":
@@ -83,28 +84,73 @@ public class NewBank {
                     } catch (NumberFormatException e) {
                         return "FAIL - invalid amount";
                     }
-                case "PAY":
-                    //TODO - Pay a friend (payee)
+                case "PAYFRIEND":
+                    //TODO - Pay a friend
                     return "FAIL";
+                case "PAY":
+                    if (!request2[1].isEmpty()) {
+                        if (request2[1].equalsIgnoreCase("?")) {
+                            return "PAY <PayeeName>, <FromAccount>, <Amount>";
+                        }
+                    }
+                    try {
+                        if (request2[1].isEmpty() || request2[2].isEmpty()) {
+                            return "FAIL - invalid command";
+                        }
+                        return pay(customer, request2[1], request2[2], Double.parseDouble(request2[3]));
+                    } catch (NumberFormatException e) {
+                        return "FAIL - invalid amount";
+                    }
                 case "MOVE":
                     //TODO - move money between your accounts
                     return "FAIL";
                 case "PRINTSTATEMENT":
                     //Print a statement of balances and recent transactions to screen
-                    String rtn = "FAIL";
+                    rtn = "FAIL";
                     if (!request2[1].isEmpty()) {
                         rtn = printStatement(customer, request2[1]);
                     }
                     return rtn;
                 case "WITHDRAW":
-                    //TODO - withdraw money from one of your accounts
-                    return "FAIL";
+                    //Withdraw money from one of your accounts
+                    if (!request2[1].isEmpty()) {
+                        if (request2[1].equalsIgnoreCase("?")) {
+                            return "WITHDRAW <FromAccount>, <Amount>";
+                        }
+                    }
+                    try {
+                        if (request2[1].isEmpty() || request2[2].isEmpty()) {
+                            return "FAIL - invalid command";
+                        }
+                        return withdraw(customer, request2[1], Double.parseDouble(request2[2]));
+                    } catch (NumberFormatException e) {
+                        return "FAIL - invalid amount";
+                    }
                 case "FINDTRANSACTION":
                     //TODO - search for a transaction
                     return "FAIL";
                 case "ADDFRIEND":
                     //TODO - add a friend (payee)
                     return "FAIL";
+                case "ADDPAYEE":
+                    //Add a new payee
+                    //AccNum, SortCode, PayeeName, Bank, Reference
+                    rtn = "";
+                    if (!request2[1].isEmpty()) {
+                        if (request2[1].equalsIgnoreCase("?")) {
+                            return "ADDPAYEE <AccNum>, <SortCode>, <PayeeName>, <Bank>";
+                        }
+                    }
+                    if (request2[1].isEmpty() || request2[2].isEmpty() || request2[3].isEmpty() || request2[4].isEmpty()) {
+                        rtn = "FAIL";
+                    } else {
+                        rtn = addPayee(customer, Integer.parseInt(request2[1]), request2[2], request2[3], request2[4]);
+                    }
+                    return rtn;
+                case "SHOWMYPAYEES":
+                    //Print a list of payees
+                    rtn = printListOfPayees(customer);
+                    return rtn;
                 case "REQUESTLOAN":
                     //TODO - request a mirco loan from NewBank
                     return "FAIL";
@@ -135,6 +181,16 @@ public class NewBank {
         return "SUCCESS";
     }
 
+    private String withdraw(CustomerID customer, String AccountName, Double amount) {
+        Account customerAccount = (customers.get(customer.getKey())).getAccount(AccountName);
+        if (customerAccount == null) {
+            return "FAIL - Account does not exist";
+        }
+        // TODO: Move Transaction creation
+        customerAccount.withdraw(amount, new Transaction(new Date(), "Customer withdrawal", amount));
+        return "SUCCESS";
+    }
+
     private String printStatement(CustomerID customer, String AccountName) {
         Account customerAccount = (customers.get(customer.getKey())).getAccount(AccountName);
         if (customerAccount == null) {
@@ -143,4 +199,36 @@ public class NewBank {
         return customerAccount.printTransactions();
     }
 
+    private String addPayee(CustomerID customer, Integer AccNum, String SortCode, String PayeeName, String Bank) {
+        Customer myCustomer = customers.get(customer.getKey());
+        if (myCustomer == null) {
+            return "FAIL";
+        }
+        myCustomer.addPayee(new Payee(AccNum, SortCode, PayeeName, Bank));
+        return "SUCCESS";
+    }
+
+    private String printListOfPayees(CustomerID customer) {
+        Customer myCustomer = customers.get(customer.getKey());
+        if (myCustomer == null) {
+            return "FAIL";
+        }
+        return myCustomer.printPayees();
+    }
+
+    private String pay(CustomerID customer, String PayeeName, String FromAccount, double amount) {
+        Account customerAccount = customers.get(customer.getKey()).getAccount(FromAccount);
+        Payee customerPayee = customers.get(customer.getKey()).getPayee(PayeeName);
+        if (customerAccount == null) {
+            return "FAIL - Account does not exist";
+        }
+        if (customerPayee == null) {
+            return "FAIL - Payee does not exist";
+        }
+        boolean OK = customerAccount.withdraw(amount, new Transaction(new Date(), "Pay " + PayeeName, amount));
+        if (OK && customerPayee.isNewBankAccount()) {
+            //TODO Deposit money into New Bank customers account
+        }
+        return "SUCCESS - Payment made to " + customerPayee.getPayeeName() + " " + customerPayee.getSortCode() + " " + customerPayee.getAccountNumber();
+    }
 }
