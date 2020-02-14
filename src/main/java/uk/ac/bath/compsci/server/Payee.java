@@ -3,9 +3,9 @@ package uk.ac.bath.compsci.server;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class Payee {
+    private String PayeeName;
     private Integer AccountNumber;
     private String SortCode;
-    private String PayeeName;
     private String PayeeBank;
 
     public Payee(Integer AccNum, String SortCode, String Payee, String PayeeBank) {
@@ -29,6 +29,18 @@ public class Payee {
 
     public Integer getAccountNumber() {
         return AccountNumber;
+    }
+
+    public String getPayeeBank() {
+        return PayeeBank;
+    }
+
+    public boolean isNewBankAccount() {
+        if (this.PayeeName.equalsIgnoreCase("NEWBANK")) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private static String requireNonBlank(final String toCheck, final String message) {

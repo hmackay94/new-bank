@@ -22,6 +22,10 @@ DEPOSIT <Account Name> <Amount>
 e.g. DEPOSIT Savings 100
 Returns SUCCESS or FAIL
 
+WITHDRAW <Account Name> <Amount>
+e.g. WITHDRAW Savings 100
+Returns SUCCESS or FAIL
+
 PRINTSTATEMENT <Account Name>
 e.g. PRINTSTATEMENT Checking
 Returns a list of recent transactions including Date, Category, Transaction Description and Amount

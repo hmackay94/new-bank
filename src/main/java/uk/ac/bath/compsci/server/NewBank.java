@@ -94,8 +94,20 @@ public class NewBank {
                     }
                     return rtn;
                 case "WITHDRAW":
-                    //TODO - withdraw money from one of your accounts
-                    return "FAIL";
+                    //Withdraw money from one of your accounts
+                    if (!request2[1].isEmpty()) {
+                        if (request2[1].equalsIgnoreCase("?")) {
+                            return "WITHDRAW <FromAccount>, <Amount>";
+                        }
+                    }
+                    try {
+                        if (request2[1].isEmpty() || request2[2].isEmpty()) {
+                            return "FAIL - invalid command";
+                        }
+                        return withdraw(customer, request2[1], Double.parseDouble(request2[2]));
+                    } catch (NumberFormatException e) {
+                        return "FAIL - invalid amount";
+                    }
                 case "FINDTRANSACTION":
                     //TODO - search for a transaction
                     return "FAIL";
@@ -151,6 +163,16 @@ public class NewBank {
         return "SUCCESS";
     }
 
+    private String withdraw(CustomerID customer, String AccountName, Double amount) {
+        Account customerAccount = (customers.get(customer.getKey())).getAccount(AccountName);
+        if (customerAccount == null) {
+            return "FAIL - Account does not exist";
+        }
+        // TODO: Move Transaction creation
+        customerAccount.withdraw(amount, new Transaction(new Date(), "Customer withdrawal", amount));
+        return "SUCCESS";
+    }
+
     private String printStatement(CustomerID customer, String AccountName) {
         Account customerAccount = (customers.get(customer.getKey())).getAccount(AccountName);
         if (customerAccount == null) {
@@ -185,7 +207,10 @@ public class NewBank {
         if (customerPayee == null) {
             return "FAIL - Payee does not exist";
         }
-        customerAccount.withdraw(amount, new Transaction(new Date(), "Pay " + PayeeName, amount));
+        boolean OK = customerAccount.withdraw(amount, new Transaction(new Date(), "Pay " + PayeeName, amount));
+        if (OK && customerPayee.isNewBankAccount()) {
+            //TODO Deposit money into New Bank customers account
+        }
         return "SUCCESS - Payment made to " + customerPayee.getPayeeName() + " " + customerPayee.getSortCode() + " " + customerPayee.getAccountNumber();
     }
 }
