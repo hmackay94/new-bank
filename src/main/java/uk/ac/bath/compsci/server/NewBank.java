@@ -3,9 +3,12 @@ package uk.ac.bath.compsci.server;
 import java.util.Date;
 import java.util.HashMap;
 
+import static java.util.Objects.isNull;
+
 public class NewBank {
     private static final NewBank bank = new NewBank();
     private HashMap<String, Customer> customers;
+    public static final Date CURRENT_DATE = new Date();
 
     private NewBank() {
         customers = new HashMap<>();
@@ -13,21 +16,20 @@ public class NewBank {
     }
 
     private void addTestData() {
-        final Date currentDate = new Date();
 
         Customer bhagy = new Customer();
         final double bhagyOpeningBalance = 1000;
-        bhagy.addAccount(new Account("Main", bhagyOpeningBalance, new Transaction(currentDate, "Opening Balance", bhagyOpeningBalance)));
+        bhagy.addAccount(new Account("Main", bhagyOpeningBalance, new Transaction(CURRENT_DATE, "Opening Balance", bhagyOpeningBalance)));
         customers.put("Bhagy", bhagy);
 
         Customer christina = new Customer();
         final double christinaOpeningBalance = 1500;
-        christina.addAccount(new Account("Savings", christinaOpeningBalance, new Transaction(currentDate, "Opening Balance", christinaOpeningBalance)));
+        christina.addAccount(new Account("Savings", christinaOpeningBalance, new Transaction(CURRENT_DATE, "Opening Balance", christinaOpeningBalance)));
         customers.put("Christina", christina);
 
         Customer john = new Customer();
         final double johnOpeningBalance = 250;
-        john.addAccount(new Account("Checking", johnOpeningBalance, new Transaction(currentDate, "Opening Balance", johnOpeningBalance)));
+        john.addAccount(new Account("Checking", johnOpeningBalance, new Transaction(CURRENT_DATE, "Opening Balance", christinaOpeningBalance)));
         customers.put("John", john);
     }
 
@@ -72,8 +74,11 @@ public class NewBank {
                 case "SHOWMYACCOUNTS":
                     return showMyAccounts(customer);
                 case "NEWACCOUNT":
-                    //TODO - open a new account
-                    return "FAIL";
+                    if (request2.length != 2) {
+                        return "FAIL - invalid command";
+                    } else {
+                        return newAccount(customer, request2[1]);
+                    }
                 case "DEPOSIT":
                     //Deposit money into one of your accounts
                     try {
@@ -81,8 +86,8 @@ public class NewBank {
                             return "FAIL - invalid command";
                         }
                         return deposit(customer, request2[1], Double.parseDouble(request2[2]));
-                    } catch (NumberFormatException e) {
-                        return "FAIL - invalid amount";
+                    } catch (IllegalArgumentException | NullPointerException e) {
+                        return e.getMessage();
                     }
                 case "PAYFRIEND":
                     //TODO - Pay a friend
@@ -102,8 +107,18 @@ public class NewBank {
                         return "FAIL - invalid amount";
                     }
                 case "MOVE":
-                    //TODO - move money between your accounts
-                    return "FAIL";
+                    try {
+                        if (request2.length != 4) {
+                            return "FAIL - invalid command";
+                        } else {
+                            return moveMoneyBetweenAccounts(customer,
+                                    Double.parseDouble(request2[1]),
+                                    request2[2],
+                                    request2[3]);
+                        }
+                    } catch (NumberFormatException e) {
+                        return "FAIL - cannot process amount";
+                    }
                 case "PRINTSTATEMENT":
                     //Print a statement of balances and recent transactions to screen
                     rtn = "FAIL";
@@ -230,5 +245,28 @@ public class NewBank {
             //TODO Deposit money into New Bank customers account
         }
         return "SUCCESS - Payment made to " + customerPayee.getPayeeName() + " " + customerPayee.getSortCode() + " " + customerPayee.getAccountNumber();
+    }
+
+    private String newAccount(final CustomerID customerID, final String accountName) {
+        final double openingBalance = 0;
+        final Account newAccount = new Account(accountName, openingBalance,
+                new Transaction(CURRENT_DATE, "Opening Balance", openingBalance));
+        customers.get(customerID.getKey()).addAccount(newAccount);
+        return "SUCCESS";
+    }
+
+    private String moveMoneyBetweenAccounts(final CustomerID customerID, final double amount, final String accountNameFrom, final String accountNameTo) {
+        final Account accountFrom = customers.get(customerID.getKey()).getAccount(accountNameFrom);
+        final Account accountTo = customers.get(customerID.getKey()).getAccount(accountNameTo);
+        if (isNull(accountFrom)) {
+            return "FAIL - Account from does not exist";
+        }
+        if (isNull(accountTo)) {
+            return "FAIL - Account to does not exist";
+        }
+        // TODO: Only do deposit if withdraw was successful
+        accountFrom.withdraw(amount, new Transaction(CURRENT_DATE, "Moved money to " + accountNameTo, amount));
+        accountTo.deposit(amount, new Transaction(CURRENT_DATE, "Moved money from " + accountNameFrom, amount));
+        return "SUCCESS";
     }
 }

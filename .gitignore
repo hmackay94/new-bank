@@ -1,3 +1,9 @@
+# IDEA config files
+.idea/
+
+# target folder
+*/target/*
+
 # Compiled class file
 *.class
 
