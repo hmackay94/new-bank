@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 import static java.util.Objects.isNull;
+import static uk.ac.bath.compsci.Utils.convertToTitleCaseSplitting;
 
 public class NewBank {
     private static final NewBank bank = new NewBank();
@@ -256,9 +257,12 @@ public class NewBank {
 
     private String newAccount(final CustomerID customerID, final String accountName) {
         final double openingBalance = 0;
-        final Account newAccount = new Account(accountName, openingBalance,
-                new Transaction(CURRENT_DATE, "Opening Balance", openingBalance));
-        customers.get(customerID.getKey()).addAccount(newAccount);
+        if (isNull(customers.get(customerID.getKey()).getAccount(accountName))) {
+            final Account newAccount = new Account(convertToTitleCaseSplitting(accountName), openingBalance,
+                    new Transaction(CURRENT_DATE, "Opening Balance", openingBalance));
+            customers.get(customerID.getKey()).addAccount(newAccount);
+        }
+
         return "SUCCESS";
     }
 
@@ -271,9 +275,12 @@ public class NewBank {
         if (isNull(accountTo)) {
             return "FAIL - Account to does not exist";
         }
-        // TODO: Only do deposit if withdraw was successful
-        accountFrom.withdraw(amount, new Transaction(CURRENT_DATE, "Moved money to " + accountNameTo, amount));
-        accountTo.deposit(amount, new Transaction(CURRENT_DATE, "Moved money from " + accountNameFrom, amount));
+        try {
+            accountFrom.withdraw(amount, new Transaction(CURRENT_DATE, "Moved money to " + accountNameTo, amount));
+            accountTo.deposit(amount, new Transaction(CURRENT_DATE, "Moved money from " + accountNameFrom, amount));
+        } catch (IllegalArgumentException e) {
+            return e.getMessage();
+        }
         return "SUCCESS";
     }
 }
