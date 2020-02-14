@@ -20,7 +20,8 @@ public class Account {
     }
 
     public String toString() {
-        return (accountName + ": " + FORMATTER.format(balance));
+        //return (accountName + ": " + FORMATTER.format(balance));
+        return (accountName + ": " + FORMATTER.format(balance) + " - ");
     }
 
     public String printTransactions() {

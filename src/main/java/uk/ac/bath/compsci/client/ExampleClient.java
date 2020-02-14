@@ -24,12 +24,24 @@ public class ExampleClient extends Thread {
             public void run() {
                 try {
                     while (true) {
+                        if (Thread.interrupted()) {
+                            break;
+                        }
                         String responce = bankServerIn.readLine();
                         System.out.println(responce);
+                        if (Thread.interrupted()) {
+                            throw new InterruptedException();
+                        }
                     }
                 } catch (IOException e) {
+                    if (bankServerResponceThread.isInterrupted()) {
+                        System.out.println("Thanks for banking with NewBank........");
+                        return;
+                    }
                     e.printStackTrace();
                     return;
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
         };
@@ -39,12 +51,34 @@ public class ExampleClient extends Thread {
 
     public void run() {
         while (true) {
+            if (Thread.interrupted()) {
+                System.out.println("Thread interrupted!");
+                break;
+            }
+
             try {
                 while (true) {
                     String command = userInput.readLine();
                     bankServerOut.println(command);
+                    // If command = EXIT then disconnect from the server
+                    if (command.equalsIgnoreCase("EXIT")) {
+                        System.out.println("SUCCESS " + command);
+                        server.close();
+                        userInput.close();
+                        bankServerOut.close();
+                        bankServerResponceThread.interrupt();
+                        System.exit(2);
+                        break;
+                    }
+                    //
+                    //bankServerOut.println(command);
                 }
             } catch (IOException e) {
+                bankServerResponceThread.interrupt();
+                if (bankServerResponceThread.isInterrupted()) {
+                    System.out.println("Thanks for banking with NewBank........");
+                    return;
+                }
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
