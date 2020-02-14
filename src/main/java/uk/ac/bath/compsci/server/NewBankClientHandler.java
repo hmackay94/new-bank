@@ -60,9 +60,23 @@ public class NewBankClientHandler extends Thread {
             // if the user is authenticated then get requests from the user and process them
             if (customer != null) {
                 out.println("Log In Successful. What do you want to do?");
+                System.out.println(Thread.currentThread().getName() + " running for " + customer.getKey());
                 while (true) {
                     String request = in.readLine();
-                    System.out.println("Request from " + customer.getKey());
+                    System.out.println(Thread.currentThread().getName() + " - Request from " + customer.getKey() + " : " + request);
+                    if (!Thread.currentThread().isAlive()) {
+                        System.out.println("Thread interrupted for " + Thread.currentThread().getName());
+                        return;
+                    }
+
+                    // If command = EXIT then disconnect from the server
+                    if (request.equalsIgnoreCase("EXIT")) {
+                        out.close();
+                        in.close();
+                        Thread.currentThread().interrupt();
+                        System.out.println(Thread.currentThread().getName() + " stopped - " + customer.getKey() + " logged off");
+                        break;
+                    }
                     String response = bank.processRequest(customer, request);
                     out.println(response);
                 }
@@ -76,6 +90,7 @@ public class NewBankClientHandler extends Thread {
                 in.close();
                 out.close();
             } catch (IOException e) {
+                System.out.println("Thread stopped for " + Thread.currentThread().getName());
                 e.printStackTrace();
                 Thread.currentThread().interrupt();
             }

@@ -29,8 +29,15 @@ public class NewBank {
 
         Customer john = new Customer();
         final double johnOpeningBalance = 250;
-        john.addAccount(new Account("Checking", johnOpeningBalance, new Transaction(CURRENT_DATE, "Opening Balance", christinaOpeningBalance)));
+        john.addAccount(new Account("Checking", johnOpeningBalance, new Transaction(CURRENT_DATE, "Opening Balance", johnOpeningBalance)));
         customers.put("John", john);
+
+        Customer paul = new Customer();
+        final double paulOpeningBalanceMain = 250;
+        final double paulOpeningBalanceSavings = 500;
+        paul.addAccount(new Account("Main", paulOpeningBalanceMain, new Transaction(CURRENT_DATE, "Opening Balance", paulOpeningBalanceMain)));
+        paul.addAccount(new Account("Savings", paulOpeningBalanceSavings, new Transaction(CURRENT_DATE, "Opening Balance", paulOpeningBalanceSavings)));
+        customers.put("Paul", paul);
     }
 
     public static NewBank getBank() {
@@ -173,7 +180,7 @@ public class NewBank {
                     //TODO - make a payment to a loan
                     return "FAIL";
                 case "EXIT":
-                    //TODO - gracefully end the client session
+                    // EXIT command handled in NewBankClientHandler and ExampleClient classes
                     return "SUCCESS";
                 default:
                     return "Command not recognized";
