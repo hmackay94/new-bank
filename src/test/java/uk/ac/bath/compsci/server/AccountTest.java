@@ -120,7 +120,7 @@ class AccountTest {
 
             assertThatIllegalArgumentException()
                     .isThrownBy(() -> testAccount.withdraw(2, mock(Transaction.class)))
-                    .withMessage("Insufficient funds - amount must not be greater than balance");
+                    .withMessage("FAIL - Insufficient funds - amount must not be greater than balance");
         }
 
         @Test
