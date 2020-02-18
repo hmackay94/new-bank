@@ -49,10 +49,10 @@ public class NewBank {
 
     public synchronized Customer createCustomer(String username, String password) throws IllegalArgumentException {
         if (customers.containsKey(username)) {
-            throw new IllegalArgumentException("FAIL - User "+username+" already exists.");
+            throw new IllegalArgumentException("User "+username+" already exists.");
         }
         else if (password.length()<8) {
-            throw new IllegalArgumentException("FAIL - Password must be at least 8 characters.");
+            throw new IllegalArgumentException("Password must be at least 8 characters.");
         }
         else {
             Customer customer = new Customer(username,password);
@@ -88,7 +88,7 @@ public class NewBank {
                         }
                         return deposit(customer, requestArray[1], Double.parseDouble(requestArray[2]));
                     } catch (IllegalArgumentException | NullPointerException e) {
-                        return e.getMessage();
+                        return "FAIL - "+e.getMessage();
                     }
                 case "WITHDRAW":
                     //Withdraw money from one of your accounts
@@ -284,8 +284,12 @@ public class NewBank {
             return "FAIL - Account to does not exist";
         }
         Date transactionDate = new Date();
-        accountFrom.withdraw(new Transaction(transactionDate, "Moved money to " + accountNameTo, amount));
-        accountTo.deposit(new Transaction(transactionDate, "Moved money from " + accountNameFrom, amount));
+        try {
+            accountFrom.withdraw(new Transaction(transactionDate, "Moved money to " + accountNameTo, amount));
+            accountTo.deposit(new Transaction(transactionDate, "Moved money from " + accountNameFrom, amount));
+        } catch (IllegalArgumentException e) {
+            return "FAIL - "+e.getMessage();
+        }
         return "SUCCESS";
     }
 }

@@ -51,7 +51,7 @@ public class NewBankClientHandler extends Thread {
                     bank.createCustomer(username, password);
                 }
                 catch (IllegalArgumentException e) {
-                    out.println(e.getMessage());
+                    out.println("FAIL - "+e.getMessage());
                 }
             }
 

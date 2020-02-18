@@ -41,7 +41,7 @@ public class Account {
         this.balance = balance + amount;
     }
 
-    public void withdraw(final Transaction withdrawalTransaction) {
+    public void withdraw(final Transaction withdrawalTransaction) throws IllegalArgumentException {
         requireNonNull(withdrawalTransaction, "withdrawalTransaction must not be null");
         double amount = withdrawalTransaction.getAmount();
         requireNonNegative(amount, "amount must not be negative");
