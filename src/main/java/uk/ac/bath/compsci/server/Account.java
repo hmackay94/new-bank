@@ -39,14 +39,14 @@ public class Account {
 
     public boolean withdraw(final double amount, final Transaction withdrawalTransaction) {
         boolean rtn = false;
-        requireNonNegative(amount, "amount must not be negative");
+        requireNonNegative(amount, "FAIL - Amount must not be negative");
         requireNonNull(withdrawalTransaction, "withdrawalTransaction must not be null");
         if (this.balance >= amount) {
             this.transactionList.add(withdrawalTransaction);
             this.balance = (balance - amount);
             rtn = true;
         } else {
-            throw new IllegalArgumentException("Insufficient funds - amount must not be greater than balance");
+            throw new IllegalArgumentException("FAIL - Insufficient funds: amount must not be greater than balance");
         }
         return rtn;
     }

@@ -44,7 +44,7 @@ class AccountTest {
     void toStringShouldPrintTheAccountNameThenBalance() {
         final Account testAccount = new Account("Test", 1, mock(Transaction.class));
         final String actual = testAccount.toString();
-        assertThat(actual).isEqualTo("Test: £1.00");
+        assertThat(actual).isEqualTo("Test: £1.00 - ");
     }
 
     @Test
@@ -120,7 +120,7 @@ class AccountTest {
 
             assertThatIllegalArgumentException()
                     .isThrownBy(() -> testAccount.withdraw(2, mock(Transaction.class)))
-                    .withMessage("amount must not be greater than balance");
+                    .withMessage("FAIL - Insufficient funds - amount must not be greater than balance");
         }
 
         @Test
