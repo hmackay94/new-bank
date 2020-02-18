@@ -3,44 +3,40 @@ package uk.ac.bath.compsci.server;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class Payee {
-    private String PayeeName;
-    private Integer AccountNumber;
-    private String SortCode;
-    private String PayeeBank;
+    private Integer accountNumber;
+    private String sortCode;
+    private String payeeName;
+    private String payeeBank;
 
-    public Payee(Integer AccNum, String SortCode, String Payee, String PayeeBank) {
-        this.AccountNumber = requireValidAccountNumber(AccNum, "Invalid account number - must be 8 digits");
-        this.PayeeBank = requireNonBlank(PayeeBank, "Must specify a bank name");
-        this.PayeeName = requireNonBlank(Payee, "Must provide payee name");
-        this.SortCode = requireValidSortCode(SortCode, "Invalid sort code - must be in format 00-00-00");
+    public Payee(Integer accountNumber, String sortCode, String payeeName, String payeeBank) {
+        this.accountNumber = requireValidAccountNumber(accountNumber, "Invalid account number - must be 8 digits");
+        this.sortCode = requireValidSortCode(sortCode, "Invalid sort code - must be in format 00-00-00");
+        this.payeeName = requireNonBlank(payeeName, "Must provide payee name");
+        this.payeeBank = requireNonBlank(payeeBank, "Must specify a bank name");
     }
 
     public String toString() {
-        return (PayeeName + ": " + PayeeBank + ": " + AccountNumber + ": " + SortCode);
-    }
-
-    public String getPayeeName() {
-        return PayeeName;
-    }
-
-    public String getSortCode() {
-        return SortCode;
+        return (payeeName + ": " + payeeBank + ": " + accountNumber + ": " + sortCode);
     }
 
     public Integer getAccountNumber() {
-        return AccountNumber;
+        return accountNumber;
+    }
+
+    public String getSortCode() {
+        return sortCode;
+    }
+
+    public String getPayeeName() {
+        return payeeName;
     }
 
     public String getPayeeBank() {
-        return PayeeBank;
+        return payeeBank;
     }
 
     public boolean isNewBankAccount() {
-        if (this.PayeeName.equalsIgnoreCase("NEWBANK")) {
-            return true;
-        } else {
-            return false;
-        }
+        return this.payeeBank.equalsIgnoreCase("NEWBANK");
     }
 
     private static String requireNonBlank(final String toCheck, final String message) {

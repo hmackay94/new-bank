@@ -23,16 +23,16 @@ public class NewBankClientHandler extends Thread {
         // keep getting requests from the client and processing them
         try {
             // ask for user name
-            String userName ="";
+            String username ="";
             String password = "";
-            CustomerID customer;
+            Customer customer;
 
             out.println("Enter LOGIN or SIGNUP");
             String initCmd = in.readLine();
             if (initCmd.equals ("LOGIN")) {
 
                 out.println("Enter Username");
-                userName = in.readLine();
+                username = in.readLine();
                 // ask for password
                 out.println("Enter Password");
                 password = in.readLine();
@@ -41,29 +41,30 @@ public class NewBankClientHandler extends Thread {
 
             if (initCmd.equals("SIGNUP")) {
                 out.println("Enter Requested Username");
-                userName = in.readLine();
+                username = in.readLine();
                 // ask for password
                 out.println("Enter Password");
                 password = in.readLine();
                 out.println("Setting up account");
                 // create customer account
-                String response = bank.createCustomer(userName, password);
-                out.println(response);
-                if(!response.equals("REGISTERED AND MAIN ACCOUNT CREATED")){
-                    userName=null;
+                try {
+                    bank.createCustomer(username, password);
+                }
+                catch (IllegalArgumentException e) {
+                    out.println(e.getMessage());
                 }
             }
 
             // authenticate user and get customer ID token from bank for use in subsequent requests
-            customer = bank.checkLogInDetails(userName, password);
+            customer = bank.checkLogInDetails(username, password);
 
             // if the user is authenticated then get requests from the user and process them
             if (customer != null) {
                 out.println("Log In Successful. What do you want to do?");
-                System.out.println(Thread.currentThread().getName() + " running for " + customer.getKey());
+                System.out.println(Thread.currentThread().getName() + " running for " + customer.getUsername());
                 while (true) {
                     String request = in.readLine();
-                    System.out.println(Thread.currentThread().getName() + " - Request from " + customer.getKey() + " : " + request);
+                    System.out.println(Thread.currentThread().getName() + " - Request from " + customer.getUsername() + " : " + request);
                     if (!Thread.currentThread().isAlive()) {
                         System.out.println("Thread interrupted for " + Thread.currentThread().getName());
                         return;
@@ -74,7 +75,7 @@ public class NewBankClientHandler extends Thread {
                         out.close();
                         in.close();
                         Thread.currentThread().interrupt();
-                        System.out.println(Thread.currentThread().getName() + " stopped - " + customer.getKey() + " logged off");
+                        System.out.println(Thread.currentThread().getName() + " stopped - " + customer.getUsername() + " logged off");
                         break;
                     }
                     String response = bank.processRequest(customer, request);
