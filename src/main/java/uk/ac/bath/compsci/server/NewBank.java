@@ -20,10 +20,12 @@ public class NewBank {
         customers.put(bhagy.getUsername(), bhagy);
 
         Customer christina = new Customer("Christina","password");
+        createAccount(christina,"Main", 500.0);
         createAccount(christina,"Savings", 1500.0);
         customers.put(christina.getUsername(), christina);
 
         Customer john = new Customer("John","password");
+        createAccount(john,"Main", 350.0);
         createAccount(john,"Checking", 250.0);
         customers.put(john.getUsername(), john);
 
@@ -31,6 +33,12 @@ public class NewBank {
         createAccount(paul,"Main", 250.0);
         createAccount(paul,"Savings", 500.0);
         customers.put(paul.getUsername(), paul);
+
+        Customer simon = new Customer("Simon","password");
+        createAccount(simon,"Main", 1250.0);
+        createAccount(simon,"Savings", 2500.0);
+        createAccount(simon,"Bills", 500.0);
+        customers.put(simon.getUsername(), simon);
     }
 
     public static NewBank getBank() {
