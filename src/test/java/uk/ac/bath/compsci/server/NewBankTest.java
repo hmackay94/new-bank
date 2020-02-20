@@ -1,6 +1,5 @@
 package uk.ac.bath.compsci.server;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,10 +11,10 @@ class NewBankTest {
     @Test
     void newAccountWillCreateNewAccount() {
         final NewBank bank = NewBank.getBank();
-        final CustomerID customerID = mock(CustomerID.class);
-        given(customerID.getKey()).willReturn("John");
+        final Customer customer = mock(Customer.class);
+        given(customer.getUsername()).willReturn("John");
 
-        final String actual = bank.processRequest(customerID, "NEWACCOUNT Main");
+        final String actual = bank.processRequest(customer, "NEWACCOUNT Main");
 
         assertThat(actual).isEqualTo("SUCCESS");
     }
@@ -23,45 +22,41 @@ class NewBankTest {
     @Test
     void newAccountWillFailIfCommandIsEmpty() {
         final NewBank bank = NewBank.getBank();
-        final CustomerID customerID = mock(CustomerID.class);
-        given(customerID.getKey()).willReturn("John");
+        final Customer customer = mock(Customer.class);
+        given(customer.getUsername()).willReturn("John");
 
-        final String actual = bank.processRequest(customerID, "NEWACCOUNT");
+        final String actual = bank.processRequest(customer, "NEWACCOUNT");
 
         assertThat(actual).isEqualTo("FAIL - invalid command");
     }
 
-    @Disabled("Should be failing but is currently passing")
     @Test
     void newAccountWillFailIfAccountAlreadyExists() {
         final NewBank bank = NewBank.getBank();
-        final CustomerID customerID = mock(CustomerID.class);
-        given(customerID.getKey()).willReturn("John");
+        final Customer customer = bank.createCustomer("Joanne","password");
 
-        final String actual = bank.processRequest(customerID, "NEWACCOUNT Checking");
-
-        assertThat(actual).isEqualTo("FAIL");
+        final String actual = bank.processRequest(customer, "NEWACCOUNT Main");
+        assertThat(actual).isEqualTo("FAIL - Account Main already exists for user Joanne.");
     }
 
     @Test
     void moveWillMoveMoneyBetweenAccounts() {
         final NewBank bank = NewBank.getBank();
-        final CustomerID customerID = mock(CustomerID.class);
-        given(customerID.getKey()).willReturn("John");
+        final Customer customer = mock(Customer.class);
+        given(customer.getUsername()).willReturn("John");
+        given(customer.getAccount("Main")).willReturn(new Account("Main",100.0));
+        given(customer.getAccount("Checking")).willReturn(new Account("Main",100.0));
 
-        bank.processRequest(customerID, "NEWACCOUNT Main");
-        final String actual = bank.processRequest(customerID, "MOVE 100 Checking Main");
-
-        assertThat(actual).isEqualTo("SUCCESS");
+        assertThat(bank.processRequest(customer, "MOVE 100 Checking Main")).isEqualTo("SUCCESS");
     }
 
     @Test
     void moveWillFailIfCommandIsEmpty() {
         final NewBank bank = NewBank.getBank();
-        final CustomerID customerID = mock(CustomerID.class);
-        given(customerID.getKey()).willReturn("John");
+        final Customer customer = mock(Customer.class);
+        given(customer.getUsername()).willReturn("John");
 
-        final String actual = bank.processRequest(customerID, "MOVE");
+        final String actual = bank.processRequest(customer, "MOVE");
 
         assertThat(actual).isEqualTo("FAIL - invalid command");
     }
@@ -69,10 +64,10 @@ class NewBankTest {
     @Test
     void moveWillFailIfNotProvidedValidAmount() {
         final NewBank bank = NewBank.getBank();
-        final CustomerID customerID = mock(CustomerID.class);
-        given(customerID.getKey()).willReturn("John");
+        final Customer customer = mock(Customer.class);
+        given(customer.getUsername()).willReturn("John");
 
-        final String actual = bank.processRequest(customerID, "MOVE a Checking Main");
+        final String actual = bank.processRequest(customer, "MOVE a Checking Main");
 
         assertThat(actual).isEqualTo("FAIL - cannot process amount");
     }
@@ -80,11 +75,10 @@ class NewBankTest {
     @Test
     void moveWillFailIfBankAccountDoesNotExist() {
         final NewBank bank = NewBank.getBank();
-        final CustomerID customerID = mock(CustomerID.class);
-        given(customerID.getKey()).willReturn("John");
-
-        bank.processRequest(customerID, "NEWACCOUNT Main");
-        final String actual = bank.processRequest(customerID, "MOVE 100 Checking Savings");
+        final Customer customer = mock(Customer.class);
+        given(customer.getUsername()).willReturn("John");
+        given(customer.getAccount("Main")).willReturn(new Account("Main",0.0));
+        final String actual = bank.processRequest(customer, "MOVE 100 Main Savings");
 
         assertThat(actual).isEqualTo("FAIL - Account to does not exist");
     }

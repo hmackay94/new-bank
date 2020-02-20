@@ -2,6 +2,7 @@ package uk.ac.bath.compsci.server;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -12,14 +13,17 @@ public class Account {
     private ArrayList<Transaction> transactionList = new ArrayList<>();
     private static final NumberFormat FORMATTER = NumberFormat.getCurrencyInstance();
 
-    public Account(final String accountName, final double openingBalance, final Transaction initialTransaction) {
+    public Account(final String accountName, final double openingBalance) {
         this.accountName = requireNonBlank(accountName, "accountName must not be blank");
         this.balance = requireNonNegative(openingBalance, "openingBalance must not be negative");
+        Transaction initialTransaction = new Transaction(new Date(),"Opening Balance",balance);
         transactionList.add(requireNonNull(initialTransaction, "initialTransaction must not be null"));
     }
 
+    @Override
     public String toString() {
-        return (accountName + ": " + FORMATTER.format(balance) + "\n");
+        //return (accountName + ": " + FORMATTER.format(balance) + "\n");
+        return (accountName + ": " + FORMATTER.format(balance));
     }
 
     public String printTransactions() {
@@ -30,25 +34,25 @@ public class Account {
         return rtn.toString();
     }
 
-    public void deposit(final double amount, final Transaction depositTransaction) {
-        requireNonNegative(amount, "amount must not be negative");
+    public void deposit(final Transaction depositTransaction) {
         requireNonNull(depositTransaction, "depositTransaction must not be null");
+        double amount = depositTransaction.getAmount();
+        requireNonNegative(amount, "amount must not be negative");
         this.transactionList.add(depositTransaction);
         this.balance = balance + amount;
     }
 
-    public boolean withdraw(final double amount, final Transaction withdrawalTransaction) {
-        boolean rtn = false;
-        requireNonNegative(amount, "amount must not be negative");
+    public void withdraw(final Transaction withdrawalTransaction) throws IllegalArgumentException {
         requireNonNull(withdrawalTransaction, "withdrawalTransaction must not be null");
+        double amount = withdrawalTransaction.getAmount();
+        requireNonNegative(amount, "amount must not be negative");
         if (this.balance >= amount) {
             this.transactionList.add(withdrawalTransaction);
             this.balance = (balance - amount);
-            rtn = true;
-        } else {
+        }
+        else {
             throw new IllegalArgumentException("Insufficient funds - amount must not be greater than balance");
         }
-        return rtn;
     }
 
     public String getAccountName() {
