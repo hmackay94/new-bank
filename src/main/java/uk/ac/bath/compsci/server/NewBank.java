@@ -8,9 +8,10 @@ import static java.util.Objects.isNull;
 public class NewBank {
     private static final NewBank bank = new NewBank();
     private HashMap<String, Customer> customers;
-    public static final Date CURRENT_DATE = new Date();
+    public static Date current_date;
 
     private NewBank() {
+        current_date = new Date();
         customers = new HashMap<>();
         addTestData();
     }
@@ -19,24 +20,24 @@ public class NewBank {
 
         Customer bhagy = new Customer();
         final double bhagyOpeningBalance = 1000;
-        bhagy.addAccount(new Account("Main", bhagyOpeningBalance, new Transaction(CURRENT_DATE, "Opening Balance", bhagyOpeningBalance)));
+        bhagy.addAccount(new Account("Main", bhagyOpeningBalance, new Transaction(current_date, "Opening Balance", bhagyOpeningBalance)));
         customers.put("Bhagy", bhagy);
 
         Customer christina = new Customer();
         final double christinaOpeningBalance = 1500;
-        christina.addAccount(new Account("Savings", christinaOpeningBalance, new Transaction(CURRENT_DATE, "Opening Balance", christinaOpeningBalance)));
+        christina.addAccount(new Account("Savings", christinaOpeningBalance, new Transaction(current_date, "Opening Balance", christinaOpeningBalance)));
         customers.put("Christina", christina);
 
         Customer john = new Customer();
         final double johnOpeningBalance = 250;
-        john.addAccount(new Account("Checking", johnOpeningBalance, new Transaction(CURRENT_DATE, "Opening Balance", johnOpeningBalance)));
+        john.addAccount(new Account("Checking", johnOpeningBalance, new Transaction(current_date, "Opening Balance", johnOpeningBalance)));
         customers.put("John", john);
 
         Customer paul = new Customer();
         final double paulOpeningBalanceMain = 250;
         final double paulOpeningBalanceSavings = 500;
-        paul.addAccount(new Account("Main", paulOpeningBalanceMain, new Transaction(CURRENT_DATE, "Opening Balance", paulOpeningBalanceMain)));
-        paul.addAccount(new Account("Savings", paulOpeningBalanceSavings, new Transaction(CURRENT_DATE, "Opening Balance", paulOpeningBalanceSavings)));
+        paul.addAccount(new Account("Main", paulOpeningBalanceMain, new Transaction(current_date, "Opening Balance", paulOpeningBalanceMain)));
+        paul.addAccount(new Account("Savings", paulOpeningBalanceSavings, new Transaction(current_date, "Opening Balance", paulOpeningBalanceSavings)));
         customers.put("Paul", paul);
     }
 
@@ -128,6 +129,11 @@ public class NewBank {
                     }
                 case "PRINTSTATEMENT":
                     //Print a statement of balances and recent transactions to screen
+                    if (!request2[1].isEmpty()) {
+                        if (request2[1].equalsIgnoreCase("?")) {
+                            return "PRINTSTATEMENT <AccountName>";
+                        }
+                    }
                     rtn = "FAIL";
                     if (!request2[1].isEmpty()) {
                         rtn = printStatement(customer, request2[1]);
@@ -257,7 +263,7 @@ public class NewBank {
     private String newAccount(final CustomerID customerID, final String accountName) {
         final double openingBalance = 0;
         final Account newAccount = new Account(accountName, openingBalance,
-                new Transaction(CURRENT_DATE, "Opening Balance", openingBalance));
+                new Transaction(current_date, "Opening Balance", openingBalance));
         customers.get(customerID.getKey()).addAccount(newAccount);
         return "SUCCESS";
     }
@@ -272,8 +278,8 @@ public class NewBank {
             return "FAIL - Account to does not exist";
         }
         // TODO: Only do deposit if withdraw was successful
-        accountFrom.withdraw(amount, new Transaction(CURRENT_DATE, "Moved money to " + accountNameTo, amount));
-        accountTo.deposit(amount, new Transaction(CURRENT_DATE, "Moved money from " + accountNameFrom, amount));
+        accountFrom.withdraw(amount, new Transaction(current_date, "Moved money to " + accountNameTo, amount));
+        accountTo.deposit(amount, new Transaction(current_date, "Moved money from " + accountNameFrom, amount));
         return "SUCCESS";
     }
 }

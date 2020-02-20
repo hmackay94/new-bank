@@ -19,7 +19,7 @@ public class Account {
     }
 
     public String toString() {
-        return (accountName + ": " + FORMATTER.format(balance) + " - ");
+        return (accountName + ": " + FORMATTER.format(balance) + "\n");
     }
 
     public String printTransactions() {
@@ -74,4 +74,5 @@ public class Account {
             throw new IllegalArgumentException(message);
         return toCheck;
     }
+
 }   // end of Account
