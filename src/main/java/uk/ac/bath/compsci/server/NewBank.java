@@ -3,6 +3,8 @@ package uk.ac.bath.compsci.server;
 import java.util.Date;
 import java.util.HashMap;
 
+import static java.util.Objects.isNull;
+
 public class NewBank {
     private static final NewBank bank = new NewBank();
     private HashMap<String, Customer> customers;
@@ -13,86 +15,211 @@ public class NewBank {
     }
 
     private void addTestData() {
-        final Date currentDate = new Date();
+        Customer bhagy = new Customer("Bhagy", "password");
+        createAccount(bhagy, "Main", 1000.0);
+        customers.put(bhagy.getUsername(), bhagy);
 
-        Customer bhagy = new Customer();
-        final double bhagyOpeningBalance = 1000;
-        bhagy.addAccount(new Account("Main", bhagyOpeningBalance, new Transaction(currentDate, "Opening Balance", bhagyOpeningBalance)));
-        customers.put("Bhagy", bhagy);
+        Customer christina = new Customer("Christina", "password");
+        createAccount(christina, "Savings", 1500.0);
+        customers.put(christina.getUsername(), christina);
 
-        Customer christina = new Customer();
-        final double christinaOpeningBalance = 1500;
-        christina.addAccount(new Account("Savings", christinaOpeningBalance, new Transaction(currentDate, "Opening Balance", christinaOpeningBalance)));
-        customers.put("Christina", christina);
+        Customer john = new Customer("John", "password");
+        createAccount(john, "Checking", 250.0);
+        customers.put(john.getUsername(), john);
 
-        Customer john = new Customer();
-        final double johnOpeningBalance = 250;
-        john.addAccount(new Account("Checking", johnOpeningBalance, new Transaction(currentDate, "Opening Balance", johnOpeningBalance)));
-        customers.put("John", john);
-
-        Customer paul = new Customer();
-        final double paulOpeningBalanceMain = 250;
-        final double paulOpeningBalanceSavings = 500;
-        paul.addAccount(new Account("Main", paulOpeningBalanceMain, new Transaction(currentDate, "Opening Balance", paulOpeningBalanceMain)));
-        paul.addAccount(new Account("Savings", paulOpeningBalanceSavings, new Transaction(currentDate, "Opening Balance", paulOpeningBalanceSavings)));
-        customers.put("Paul", paul);
+        Customer paul = new Customer("Paul", "password");
+        createAccount(paul, "Main", 250.0);
+        createAccount(paul, "Savings", 500.0);
+        customers.put(paul.getUsername(), paul);
     }
 
     public static NewBank getBank() {
         return bank;
     }
 
-    public synchronized CustomerID checkLogInDetails(String userName, String password) {
-        if (customers.containsKey(userName)) {
-            return new CustomerID(userName);
+    public synchronized Customer checkLogInDetails(String username, String password) {
+        if (customers.containsKey(username)) {
+            Customer customer = customers.get(username);
+            if (customer.passwordMatches(password)) {
+                return customer;
+            }
         }
         return null;
     }
 
-    // commands from the NewBank customer are processed in this method
-    public synchronized String processRequest(CustomerID customer, String request) {
-        if (customers.containsKey(customer.getKey())) {
+    public synchronized Customer createCustomer(String username, String password) throws IllegalArgumentException {
+        if (customers.containsKey(username)) {
+            throw new IllegalArgumentException("User " + username + " already exists.");
+        } else if (password.length() < 8) {
+            throw new IllegalArgumentException("Password must be at least 8 characters.");
+        } else {
+            Customer customer = new Customer(username, password);
+            final double openingBalance = 0;
+            customer.addAccount(new Account("Main", openingBalance));
+            customers.put(username, customer);
+            return customer;
+        }
 
-            String[] request2 = request.split(" ");
-            String cmd = request2[0];
+    }
+
+    // commands from the NewBank customer are processed in this method
+    public synchronized String processRequest(Customer customer, String request) {
+        if (customer != null && customers.containsKey(customer.getUsername())) {
+
+            String[] requestArray = request.split(" ");
+            String cmd = requestArray[0];
 
             switch (cmd) {
                 case "SHOWMYACCOUNTS":
-                    return showMyAccounts(customer);
+                    return customer.printAccounts();
                 case "NEWACCOUNT":
-                    //TODO - open a new account
-                    return "FAIL";
+                    if (requestArray.length != 2) {
+                        return "FAIL - invalid command";
+                    } else {
+                        return createAccount(customer, requestArray[1], 0.0);
+                    }
                 case "DEPOSIT":
                     //Deposit money into one of your accounts
                     try {
-                        if (request2[1].isEmpty() || request2[2].isEmpty()) {
+                        if (requestArray[1].isEmpty() || requestArray[2].isEmpty()) {
                             return "FAIL - invalid command";
                         }
-                        return deposit(customer, request2[1], Double.parseDouble(request2[2]));
+                        return deposit(customer, customer.getUsername(), requestArray[1], Double.parseDouble(requestArray[2]));
+                    } catch (IllegalArgumentException | NullPointerException e) {
+                        return "FAIL - " + e.getMessage();
+                    }
+                case "WITHDRAW":
+                    //Withdraw money from one of your accounts
+                    if (!requestArray[1].isEmpty()) {
+                        if (requestArray[1].equalsIgnoreCase("?")) {
+                            return "WITHDRAW <FromAccount> <Amount>";
+                        }
+                    }
+                    try {
+                        if (requestArray[1].isEmpty() || requestArray[2].isEmpty()) {
+                            return "FAIL - invalid command";
+                        }
+                        return withdraw(customer, requestArray[1], Double.parseDouble(requestArray[2]));
                     } catch (NumberFormatException e) {
                         return "FAIL - invalid amount";
                     }
-                case "PAY":
-                    //TODO - Pay a friend (payee)
-                    return "FAIL";
                 case "MOVE":
-                    //TODO - move money between your accounts
-                    return "FAIL";
+                    try {
+                        if (requestArray.length != 4) {
+                            return "FAIL - invalid command";
+                        } else {
+                            return moveMoneyBetweenAccounts(customer,
+                                    Double.parseDouble(requestArray[1]),
+                                    requestArray[2],
+                                    requestArray[3]);
+                        }
+                    } catch (NumberFormatException e) {
+                        return "FAIL - cannot process amount";
+                    }
+                case "PAY":
+                    if (requestArray[1].equalsIgnoreCase("?")) {
+                        return "PAY <PayeeName> <FromAccount> <Amount>";
+                    } else if (requestArray.length != 4) {
+                        return "FAIL - invalid command";
+                    }
+                    try {
+                        return pay(customer, requestArray[1], requestArray[2], Double.parseDouble(requestArray[3]));
+                    } catch (NumberFormatException e) {
+                        return "FAIL - invalid amount";
+                    }
                 case "PRINTSTATEMENT":
                     //Print a statement of balances and recent transactions to screen
-                    String rtn = "FAIL";
-                    if (!request2[1].isEmpty()) {
-                        rtn = printStatement(customer, request2[1]);
+                    if (!requestArray[1].isEmpty()) {
+                        return printStatement(customer, requestArray[1]);
                     }
-                    return rtn;
-                case "WITHDRAW":
-                    //TODO - withdraw money from one of your accounts
-                    return "FAIL";
-                case "FINDTRANSACTION":
-                    //TODO - search for a transaction
                     return "FAIL";
                 case "ADDFRIEND":
-                    //TODO - add a friend (payee)
+                    if (requestArray.length <= 1) {
+                        return "FAIL - specify a username to add as a friend";
+                    } else if (requestArray[1].equalsIgnoreCase("?")) {
+                        return "ADDFRIEND <Name>";
+                    } else if (requestArray.length != 2) {
+                        return "FAIL - invalid command";
+                    }
+                    Customer friendToAdd = customers.get(requestArray[1]);
+                    if (friendToAdd == null) {
+                        return "FAIL - no customer with username " + requestArray[1];
+                    }
+                    try {
+                        customer.addFriend(friendToAdd);
+                        friendToAdd.addFriend(customer);
+                    } catch (IllegalArgumentException e) {
+                        return "FAIL - " + e.getMessage();
+                    }
+                    return "SUCCESS - " + customer.getUsername() + " and " + friendToAdd.getUsername() + " are now friends.";
+                case "PAYFRIEND":
+                    if (requestArray.length != 5) {
+                        return "FAIL - invalid command";
+                    } else if (requestArray[1].equalsIgnoreCase("?")) {
+                        return "PAYFRIEND <FriendName> <FriendAccount> <FromAccount> <Amount>";
+                    }
+                    try {
+                        return payFriend(customer, requestArray[1], requestArray[2], requestArray[3], Double.parseDouble(requestArray[4]));
+                    } catch (NumberFormatException e) {
+                        return "FAIL - invalid amount";
+                    }
+                case "SHOWMYFRIENDS":
+                    return customer.printFriends();
+                case "SHOWMYFRIENDACCOUNTS":
+                    if (requestArray.length <= 1) {
+                        return "FAIL - specify a username to show your friend's accounts";
+                    } else if (requestArray[1].equalsIgnoreCase("?")) {
+                        return "SHOWMYFRIENDACCOUNTS <Name>";
+                    } else if (requestArray.length != 2) {
+                        return "FAIL - invalid command";
+                    }
+                    Customer friendNameCheck = customers.get(requestArray[1]);
+                    String friendName = requestArray[1];
+                    if (friendNameCheck == null) {
+                        return "FAIL - no customer with username " + requestArray[1];
+                    }
+                    try {
+                        return customer.showFriendAccounts(friendName);
+                    } catch (IllegalArgumentException e) {
+                        return "FAIL - " + e.getMessage();
+                    }
+                case "REMOVEFRIEND":
+                    if (requestArray.length <= 1) {
+                        return "FAIL - specify a username to remove as a friend";
+                    } else if (requestArray[1].equalsIgnoreCase("?")) {
+                        return "SHOWMYFRIENDACCOUNTS <Name>";
+                    } else if (requestArray.length != 2) {
+                        return "FAIL - invalid command";
+                    }
+                    Customer friendToRemove = customers.get(requestArray[1]);
+                    if (friendToRemove == null) {
+                        return "FAIL - no customer with username " + requestArray[1];
+                    }
+                    try {
+                        customer.removeFriend(friendToRemove);
+                        friendToRemove.removeFriend(customer);
+                    } catch (IllegalArgumentException e) {
+                        return "FAIL - " + e.getMessage();
+                    }
+                    return "SUCCESS - " + customer.getUsername() + " and " + friendToRemove.getUsername() + " are no longer friends.";
+                case "ADDPAYEE":
+                    //Add a new payee
+                    //AccNum, SortCode, PayeeName, Bank, Reference
+                    if (!requestArray[1].isEmpty()) {
+                        if (requestArray[1].equalsIgnoreCase("?")) {
+                            return "ADDPAYEE <AccNum> <SortCode> <PayeeName> <Bank>";
+                        }
+                    }
+                    if (requestArray[1].isEmpty() || requestArray[2].isEmpty() || requestArray[3].isEmpty() || requestArray[4].isEmpty()) {
+                        return "FAIL";
+                    } else {
+                        return addPayee(customer, Integer.parseInt(requestArray[1]), requestArray[2], requestArray[3], requestArray[4]);
+                    }
+                case "SHOWMYPAYEES":
+                    //Print a list of payees
+                    return customer.printPayees();
+                case "FINDTRANSACTION":
+                    //TODO - search for a transaction
                     return "FAIL";
                 case "REQUESTLOAN":
                     //TODO - request a mirco loan from NewBank
@@ -101,7 +228,7 @@ public class NewBank {
                     //TODO - make a payment to a loan
                     return "FAIL";
                 case "EXIT":
-                    //EXIT command handled in NewBankClientHandler and ExampleClient classes
+                    // EXIT command handled in NewBankClientHandler and ExampleClient classes
                     return "SUCCESS";
                 default:
                     return "Command not recognized";
@@ -110,26 +237,110 @@ public class NewBank {
         return "FAIL";
     }
 
-    private String showMyAccounts(CustomerID customer) {
-        return (customers.get(customer.getKey())).accountsToString();
+    private String deposit(Customer customer, String userName, String accountName, Double amount) {
+        Account customerAccount = (customer.getAccount(accountName));
+        if (customerAccount == null) {
+            return "FAIL - Account does not exist";
+        }
+        String customerName = customer.getUsername();
+        // TODO: Move Transaction creation
+        //customerAccount.deposit(new Transaction(new Date(), "Customer deposit", amount));
+        customerAccount.deposit(new Transaction(new Date(), "Deposit from " + userName, amount));
+        return "SUCCESS";
     }
 
-    private String deposit(CustomerID customer, String AccountName, Double amount) {
-        Account customerAccount = (customers.get(customer.getKey())).getAccount(AccountName);
+    private String withdraw(Customer customer, String accountName, Double amount) {
+        Account customerAccount = (customer.getAccount(accountName));
         if (customerAccount == null) {
             return "FAIL - Account does not exist";
         }
         // TODO: Move Transaction creation
-        customerAccount.deposit(amount, new Transaction(new Date(), "Customer deposit", amount));
+        customerAccount.withdraw(new Transaction(new Date(), "Customer withdrawal", amount));
         return "SUCCESS";
     }
 
-    private String printStatement(CustomerID customer, String AccountName) {
-        Account customerAccount = (customers.get(customer.getKey())).getAccount(AccountName);
+    private String printStatement(Customer customer, String accountName) {
+        Account customerAccount = (customer.getAccount(accountName));
         if (customerAccount == null) {
             return "FAIL - Account does not exist";
         }
         return customerAccount.printTransactions();
     }
 
+    private String addPayee(Customer customer, Integer accountNumber, String sortCode, String payeeName, String bank) {
+        try {
+            customer.addPayee(new Payee(accountNumber, sortCode, payeeName, bank));
+        } catch (IllegalArgumentException e) {
+            return "FAIL - " + e.getMessage();
+        }
+        return "SUCCESS";
+    }
+
+    private String pay(Customer customer, String payeeName, String fromAccount, double amount) {
+        Account customerAccount = customer.getAccount(fromAccount);
+        if (customerAccount == null) {
+            return "FAIL - Account does not exist";
+        }
+        Payee customerPayee = customer.getPayee(payeeName);
+        if (customerPayee == null) {
+            return "FAIL - Payee does not exist";
+        }
+        Date transactionDate = new Date();
+        customerAccount.withdraw(new Transaction(transactionDate, "Pay " + payeeName, amount));
+        if (customerPayee.isNewBankAccount()) {
+            Account payeeAccount = customers.get(payeeName).getAccount("Main");
+            payeeAccount.deposit(new Transaction(transactionDate, "Received from " + customer.getUsername(), amount));
+        }
+        return "SUCCESS - Payment made to " + customerPayee.getPayeeName() + " " + customerPayee.getSortCode() + " " + customerPayee.getAccountNumber();
+    }
+
+    public String payFriend(Customer customer, String friendName, String friendAccount, String fromAccount, double amount) {
+
+        Account customerAccount = customer.getAccount(fromAccount);
+        Customer customerFriend = customer.getFriend(friendName);
+        Account customerFriendAccount = customerFriend.getAccount(friendAccount);
+        if (customerFriendAccount == null) {
+            return "FAIL - Account entered for your friend does not exist";
+        }
+        String customerName = customer.getUsername();
+        String customerFriendName = customerFriend.getUsername();
+        if (customerFriendName == null) {
+            return "FAIL - Friend does not exist";
+        }
+        if (customerAccount == null) {
+            return "FAIL - Account entered does not exist";
+        }
+        deposit(customerFriend, customerName, friendAccount, amount);
+        withdraw(customer, fromAccount, amount);
+        return "SUCCESS - Payment for " + amount + " made to " + friendName + " account " + friendAccount + " from account " + fromAccount;
+    }
+
+    private String createAccount(final Customer customer, final String accountName, double initialBalance) {
+        final Account newAccount = new Account(accountName, initialBalance);
+        try {
+            customer.addAccount(newAccount);
+        } catch (IllegalArgumentException e) {
+            return "FAIL - " + e.getMessage();
+        }
+        return "SUCCESS";
+    }
+
+    private String moveMoneyBetweenAccounts(final Customer customer, final double amount, final String accountNameFrom, final String accountNameTo) {
+        final Account accountFrom = customer.getAccount(accountNameFrom);
+        if (accountFrom == null) {
+            return "FAIL - Account from does not exist";
+        }
+        final Account accountTo = customer.getAccount(accountNameTo);
+        if (isNull(accountTo)) {
+            return "FAIL - Account to does not exist";
+        }
+        Date transactionDate = new Date();
+        try {
+            accountFrom.withdraw(new Transaction(transactionDate, "Moved money to " + accountNameTo, amount));
+            accountTo.deposit(new Transaction(transactionDate, "Moved money from " + accountNameFrom, amount));
+        } catch (IllegalArgumentException e) {
+            return "FAIL - " + e.getMessage();
+        }
+        return "SUCCESS";
+    }
 }

@@ -10,18 +10,53 @@ NEWACCOUNT <Name>
 e.g. NEWACCOUNT Savings
 Returns SUCCESS or FAIL
 
+DEPOSIT <Account Name> <Amount>
+e.g. DEPOSIT Savings 100
+Returns SUCCESS or FAIL
+
+WITHDRAW <Account Name> <Amount>
+e.g. WITHDRAW Savings 100
+Returns SUCCESS or FAIL
+
 MOVE <Amount> <From> <To>
 e.g. MOVE 100 Main Savings 
 Returns SUCCESS or FAIL
 
-PAY <Person/Company> <Amount>
-e.g. PAY John 100
-Returns SUCCESS or FAIL
-
-DEPOSIT <Account Name> <Amount>
-e.g. DEPOSIT Savings 100
+PAY <PayeeName> <FromAccount> <Amount>
+Makes a payment to an existing payee, for a specified amount from a given account
+e.g. PAY Jonathan Checking 100
 Returns SUCCESS or FAIL
 
 PRINTSTATEMENT <Account Name>
 e.g. PRINTSTATEMENT Checking
 Returns a list of recent transactions including Date, Category, Transaction Description and Amount
+
+ADDFRIEND <Name>
+e.g. ADDFRIEND Jonathan
+Adds a friend (another customer of NEWBANK) to the logged on customer's list of friends
+
+PAYFRIEND <FriendName> <FriendAccount> <FromAccount> <Amount>
+Makes a payment to an existing friend account, for a specified amount from a given account
+e.g. PAY Paul Savings Main 100
+Returns SUCCESS or FAIL
+
+SHOWMYFRIENDS
+Returns a list of friends for the logged on customer
+
+SHOWMYFRIENDACCOUNTS <Name>
+e.g. SHOWMYFRIENDACCOUNTS Paul
+List all accounts a friend
+
+REMOVEFRIEND <Name>
+e.g. REMOVEFRIEND Jonathan
+Remoes a friend from the customer's list of friends
+
+ADDPAYEE <Account Number> <Sort Code> <Payee Name> <Payee Bank>
+e.g. ADDPAYEE 12345678 01-01-01 Jonathan OldBank
+Adds a payee at another bank with a valid account number and sort code
+
+SHOWMYPAYEES
+Returns a list of Payees for the logged on Customer
+
+EXIT
+Exit the program
