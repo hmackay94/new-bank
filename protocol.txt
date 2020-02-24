@@ -35,8 +35,17 @@ ADDFRIEND <Name>
 e.g. ADDFRIEND Jonathan
 Adds a friend (another customer of NEWBANK) to the logged on customer's list of friends
 
+PAYFRIEND <FriendName> <FriendAccount> <FromAccount> <Amount>
+Makes a payment to an existing friend account, for a specified amount from a given account
+e.g. PAY Paul Savings Main 100
+Returns SUCCESS or FAIL
+
 SHOWMYFRIENDS
 Returns a list of friends for the logged on customer
+
+SHOWMYFRIENDACCOUNTS <Name>
+e.g. SHOWMYFRIENDACCOUNTS Paul
+List all accounts a friend
 
 REMOVEFRIEND <Name>
 e.g. REMOVEFRIEND Jonathan

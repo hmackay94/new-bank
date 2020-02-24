@@ -16,13 +16,14 @@ public class Account {
     public Account(final String accountName, final double openingBalance) {
         this.accountName = requireNonBlank(accountName, "accountName must not be blank");
         this.balance = requireNonNegative(openingBalance, "openingBalance must not be negative");
-        Transaction initialTransaction = new Transaction(new Date(),"Opening Balance",balance);
+        Transaction initialTransaction = new Transaction(new Date(), "Opening Balance", balance);
         transactionList.add(requireNonNull(initialTransaction, "initialTransaction must not be null"));
     }
 
     @Override
     public String toString() {
         return (accountName + ": " + FORMATTER.format(balance));
+        ///return (accountName + ": " + FORMATTER.format(balance) + " - ");
     }
 
     public String printTransactions() {
@@ -48,8 +49,7 @@ public class Account {
         if (this.balance >= amount) {
             this.transactionList.add(withdrawalTransaction);
             this.balance = (balance - amount);
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("Insufficient funds - amount must not be greater than balance");
         }
     }
