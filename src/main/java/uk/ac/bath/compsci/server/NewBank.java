@@ -86,17 +86,22 @@ public class NewBank {
                     if (requestArray.length != 2) {
                         return "FAIL - invalid command";
                     } else {
-                        return createAccount(customer, requestArray[1],0.0);
+                        return createAccount(customer, requestArray[1], 0.0);
                     }
                 case "DEPOSIT":
                     //Deposit money into one of your accounts
                     try {
+                        if (!requestArray[1].isEmpty()) {
+                            if (requestArray[1].equalsIgnoreCase("?")) {
+                                return "DEPOSIT <AccountName> <Amount>";
+                            }
+                        }
                         if (requestArray[1].isEmpty() || requestArray[2].isEmpty()) {
                             return "FAIL - invalid command";
                         }
                         return deposit(customer, requestArray[1], Double.parseDouble(requestArray[2]));
                     } catch (IllegalArgumentException | NullPointerException e) {
-                        return "FAIL - "+e.getMessage();
+                        return "FAIL - " + e.getMessage();
                     }
                 case "WITHDRAW":
                     //Withdraw money from one of your accounts
@@ -112,6 +117,23 @@ public class NewBank {
                         return withdraw(customer, requestArray[1], Double.parseDouble(requestArray[2]));
                     } catch (NumberFormatException e) {
                         return "FAIL - invalid amount";
+                    }
+                case "ADDTRANSACTION":
+                    //Add a transaction into one of your accounts
+                    try {
+                        if (!requestArray[1].isEmpty()) {
+                            if (requestArray[1].equalsIgnoreCase("?")) {
+                                return "ADDTRANSACTION <AccountName> <Category> <Description> <Amount>";
+                            }
+                        }
+                        if (requestArray[1].isEmpty() || requestArray[2].isEmpty()) {
+                            return "FAIL - invalid command";
+                        }
+                        //<AccountName> <Date> <Category> <Description> <Amount>
+                        Date transactionDate = new Date();
+                        return addTransaction(customer, requestArray[1], transactionDate, requestArray[2], requestArray[3], Double.parseDouble(requestArray[4]));
+                    } catch (IllegalArgumentException | NullPointerException e) {
+                        return "FAIL - " + e.getMessage();
                     }
                 case "MOVE":
                     try {
@@ -142,6 +164,11 @@ public class NewBank {
                     }
                 case "PRINTSTATEMENT":
                     //Print a statement of balances and recent transactions to screen
+                    if (requestArray.length >= 2 && !requestArray[1].isEmpty()) {
+                        if (requestArray[1].equalsIgnoreCase("?")) {
+                            return "PRINTSTATEMENT <AccountName>";
+                        }
+                    }
                     if (!requestArray[1].isEmpty()) {
                         return printStatement(customer, requestArray[1]);
                     }
@@ -296,8 +323,26 @@ public class NewBank {
             accountFrom.withdraw(new Transaction(transactionDate, "Moved money to " + accountNameTo, amount));
             accountTo.deposit(new Transaction(transactionDate, "Moved money from " + accountNameFrom, amount));
         } catch (IllegalArgumentException e) {
-            return "FAIL - "+e.getMessage();
+            return "FAIL - " + e.getMessage();
         }
         return "SUCCESS";
     }
-}
+
+    private String addTransaction(Customer customer, String accountName, Date txnDate, String txnCategory, String txnDescription, Double amount) {
+        Account customerAccount = (customer.getAccount(accountName));
+        Double absAmount = java.lang.Math.abs(amount);
+        if (customerAccount == null) {
+            return "FAIL - Account does not exist";
+        }
+        if (amount == 0) {
+            return "FAIL - Amount must not be zero";
+        }
+        if (amount < 0) {
+            customerAccount.withdraw(new Transaction(txnDate, txnDescription, absAmount, txnCategory));
+        } else {
+            customerAccount.deposit(new Transaction(txnDate, txnDescription, absAmount, txnCategory));
+        }
+        return "SUCCESS";
+    }
+
+}   //end of NewBank

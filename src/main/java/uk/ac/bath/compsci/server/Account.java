@@ -22,6 +22,7 @@ public class Account {
 
     @Override
     public String toString() {
+        //return (accountName + ": " + FORMATTER.format(balance) + "\n");
         return (accountName + ": " + FORMATTER.format(balance));
     }
 
@@ -44,10 +45,10 @@ public class Account {
     public void withdraw(final Transaction withdrawalTransaction) throws IllegalArgumentException {
         requireNonNull(withdrawalTransaction, "withdrawalTransaction must not be null");
         double amount = withdrawalTransaction.getAmount();
-        requireNonNegative(amount, "amount must not be negative");
+        //requireNonNegative(amount, "amount must not be negative");
         if (this.balance >= amount) {
             this.transactionList.add(withdrawalTransaction);
-            this.balance = (balance - amount);
+            this.balance = (balance - java.lang.Math.abs(amount));
         }
         else {
             throw new IllegalArgumentException("Insufficient funds - amount must not be greater than balance");
@@ -77,4 +78,5 @@ public class Account {
             throw new IllegalArgumentException(message);
         return toCheck;
     }
+
 }   // end of Account
