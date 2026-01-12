@@ -15,7 +15,7 @@
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <mockito-core.version>3.2.4</mockito-core.version>
-        <commons-lang3.version>3.9</commons-lang3.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
     </properties>
 
     <dependencies>
